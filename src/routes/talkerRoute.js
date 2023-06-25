@@ -11,4 +11,14 @@ talkerRoute.get('/', async (_req, res) => {
     return res.status(200).json(dadosLidos);
   });
 
+  talkerRoute.get('/:id', async (req, res) => {
+    const { id } = req.params;
+    const dadosLidos = await leituraArquivos();
+    const idEncontrado = dadosLidos.find((pessoa) => pessoa.id === Number(id)); // quando não existe, dá undefined
+    if (!idEncontrado) {
+        return res.status(404).json({"message": "Pessoa palestrante não encontrada"})
+    }
+    return res.status(200).json(idEncontrado);
+  })
+
   module.exports = talkerRoute;
