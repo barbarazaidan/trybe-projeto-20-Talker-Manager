@@ -7,6 +7,7 @@ const validaTalk = require('../validacoes/validaTalk');
 const validaWatchedAt = require('../validacoes/validaWatchedAt');
 const validaRate = require('../validacoes/validaRate');
 const validaToken = require('../validacoes/validaToken');
+const validaPalestrante = require('../validacoes/validaPalestrante');
 
 const talkerRoute = express.Router();
 
@@ -34,10 +35,27 @@ talkerRoute.get('/', async (_req, res) => {
     const { name, age, talk } = req.body;
     const dadosLidos = await leituraArquivos();
     const id = dadosLidos.length + 1;
-    const novoUsuario = { name, age, id, talk };
-    dadosLidos.push(novoUsuario);
+    const novoPalestrante = { name, age, id, talk };
+    dadosLidos.push(novoPalestrante);
     await escritaArquivos(dadosLidos);
-    return res.status(201).json(novoUsuario);
+    return res.status(201).json(novoPalestrante);
+  });
+
+  talkerRoute.put('/:id',
+  validaToken, validaNome, validaAge, validaTalk, validaWatchedAt, validaRate, validaPalestrante,
+  async (req, res) => {
+    const { id } = req.params;
+    const { name, age, talk } = req.body;
+    const palestranteNovo = { id: +id, name, age, talk };
+    const dadosLidos = await leituraArquivos();
+    const dadosComPalestranteAlterado = dadosLidos.map((palestrante) => {
+      if (palestrante.id === Number(id)) {
+       return palestranteNovo;
+      }
+      return palestrante;
+    });
+    await escritaArquivos(dadosComPalestranteAlterado);
+    return res.status(200).json(palestranteNovo);
   });
 
   module.exports = talkerRoute;
