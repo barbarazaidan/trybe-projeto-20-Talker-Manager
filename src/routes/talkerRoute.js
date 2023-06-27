@@ -46,7 +46,7 @@ talkerRoute.get('/', async (_req, res) => {
   async (req, res) => {
     const { id } = req.params;
     const { name, age, talk } = req.body;
-    const palestranteNovo = { id: +id, name, age, talk };
+    const palestranteNovo = { id: +id, name, age, talk }; // o +id é igual a Number(id)
     const dadosLidos = await leituraArquivos();
     const dadosComPalestranteAlterado = dadosLidos.map((palestrante) => {
       if (palestrante.id === Number(id)) {
@@ -56,6 +56,14 @@ talkerRoute.get('/', async (_req, res) => {
     });
     await escritaArquivos(dadosComPalestranteAlterado);
     return res.status(200).json(palestranteNovo);
+  });
+
+  talkerRoute.delete('/:id', validaToken, async (req, res) => {
+    const { id } = req.params;
+    const dadosLidos = await leituraArquivos();
+    const dadosComPalestranteDeletado = dadosLidos.filter((palestrante) => palestrante.id !== +id);
+    await escritaArquivos(dadosComPalestranteDeletado);
+    return res.status(204).json();
   });
 
   module.exports = talkerRoute;
