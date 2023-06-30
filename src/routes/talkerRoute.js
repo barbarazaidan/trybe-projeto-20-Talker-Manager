@@ -8,6 +8,7 @@ const validaWatchedAt = require('../validacoes/validaWatchedAt');
 const validaRate = require('../validacoes/validaRate');
 const validaToken = require('../validacoes/validaToken');
 const validaPalestrante = require('../validacoes/validaPalestrante');
+const validaQuery = require('../validacoes/validaQuery');
 
 const talkerRoute = express.Router();
 
@@ -17,6 +18,16 @@ talkerRoute.get('/', async (_req, res) => {
         return res.status(200).json([]);
     }
     return res.status(200).json(dadosLidos);
+  });
+
+  // a rota /search tem que ficar aqui, do contrário, o Thunderclient lê primeiro o /:id 
+  talkerRoute.get('/search', validaToken, validaQuery, async (req, res) => {
+    const { q } = req.query;
+    const dadosLidos = await leituraArquivos();
+    const palestrantesEncontrados = dadosLidos.filter(
+      ({ name }) => name.toLowerCase().includes(q.toLowerCase()),
+    );
+    return res.status(200).json(palestrantesEncontrados);
   });
 
   talkerRoute.get('/:id', async (req, res) => {
