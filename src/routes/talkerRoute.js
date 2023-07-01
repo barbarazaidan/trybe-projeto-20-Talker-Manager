@@ -22,12 +22,16 @@ talkerRoute.get('/', async (_req, res) => {
 
   // a rota /search tem que ficar aqui, do contrário, o Thunderclient lê primeiro o /:id 
   talkerRoute.get('/search', validaToken, validaQuery, async (req, res) => {
-    const { q } = req.query;
+    const { q, rate } = req.query;
     const dadosLidos = await leituraArquivos();
-    const palestrantesEncontrados = dadosLidos.filter(
+    const palestrantesEncontradosSearchTerm = dadosLidos.filter(
       ({ name }) => name.toLowerCase().includes(q.toLowerCase()),
     );
-    return res.status(200).json(palestrantesEncontrados);
+
+    const palestrantesEncontradosRate = palestrantesEncontradosSearchTerm.filter(
+      ({ talk }) => talk.rate === +rate,
+    );
+    return res.status(200).json(palestrantesEncontradosRate);
   });
 
   talkerRoute.get('/:id', async (req, res) => {
