@@ -6,8 +6,18 @@ const verificaRate = (rate) => {
     } return true;
 };
 
+const verificaRateParams = (req) => {
+    const chaves = Object.keys(req.body);
+    if (chaves.includes('talk')) {
+        const { talk: { rate } } = req.body;
+        return rate;
+    }
+    const { rate } = req.body;
+    return rate;
+};
+
 const validaRate = (req, res, next) => {
-    const { talk: { rate } } = req.body;
+    const rate = verificaRateParams(req);
 
     // !rate - pega tanto quando o rate vem indefinido quanto quando ele vem igual a zero
 

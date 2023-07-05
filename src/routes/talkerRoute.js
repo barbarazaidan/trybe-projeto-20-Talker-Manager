@@ -86,6 +86,27 @@ talkerRoute.get('/', async (_req, res) => {
     return res.status(200).json(palestranteNovo);
   });
 
+  talkerRoute.patch('/rate/:id', validaToken, validaRate, async (req, res) => {
+    const { id } = req.params;
+    const { rate } = req.body;
+    const dadosLidos = await leituraArquivos();
+
+    const dadosComRateAlterado = dadosLidos.map((palestrante) => {
+      if (palestrante.id === +id) {
+        return {
+          ...palestrante,
+          talk: { ...palestrante.talk,
+            rate,
+          },
+        };
+      }
+      return palestrante;
+    });
+   
+    await escritaArquivos(dadosComRateAlterado);
+    return res.status(204).json();
+  });
+
   talkerRoute.delete('/:id', validaToken, async (req, res) => {
     const { id } = req.params;
     const dadosLidos = await leituraArquivos();
