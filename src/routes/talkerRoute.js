@@ -8,7 +8,10 @@ const validaWatchedAt = require('../validacoes/validaWatchedAt');
 const validaRate = require('../validacoes/validaRate');
 const validaToken = require('../validacoes/validaToken');
 const validaPalestrante = require('../validacoes/validaPalestrante');
-const validaQuery = require('../validacoes/validaQuery');
+const validaQueryIndefinidas = require('../validacoes/validaQueryIndefinidas');
+const validaQueyDefinidas = require('../validacoes/validaQueyDefinidas');
+const verificaQueryDate = require('../utils/verificaQueryDate');
+const verificaQueryRate = require('../utils/verificaQueryRate');
 
 const talkerRoute = express.Router();
 
@@ -21,17 +24,27 @@ talkerRoute.get('/', async (_req, res) => {
   });
 
   // a rota /search tem que ficar aqui, do contrário, o Thunderclient lê primeiro o /:id 
-  talkerRoute.get('/search', validaToken, validaQuery, async (req, res) => {
-    const { q, rate } = req.query;
+  talkerRoute.get('/search', 
+  validaToken, validaQueryIndefinidas, validaQueyDefinidas,
+  async (req, res) => {
+    const { q, rate, date } = req.query;
     const dadosLidos = await leituraArquivos();
-    const palestrantesEncontradosSearchTerm = dadosLidos.filter(
-      ({ name }) => name.toLowerCase().includes(q.toLowerCase()),
-    );
+    const retornoQueryRate = verificaQueryRate(rate, dadosLidos);
+    const retornoQueryDate = verificaQueryDate(date, dadosLidos);
 
-    const palestrantesEncontradosRate = palestrantesEncontradosSearchTerm.filter(
-      ({ talk }) => talk.rate === +rate,
-    );
-    return res.status(200).json(palestrantesEncontradosRate);
+    if (retornoQueryRate.message) {
+      return res.status(400).json(retornoQueryRate);
+  }
+    
+    if (retornoQueryDate.message) {
+      return res.status(400).json(retornoQueryDate);
+  }
+
+  const retorno3Query = retornoQueryRate
+    .filter(({ talk }) => talk.watchedAt === date)
+    .filter(({ name }) => name.toLowerCase().includes(q.toLowerCase()));
+    
+    return res.status(200).json(retorno3Query);
   });
 
   talkerRoute.get('/:id', async (req, res) => {
