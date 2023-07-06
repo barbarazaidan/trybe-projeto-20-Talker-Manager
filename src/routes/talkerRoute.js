@@ -12,6 +12,7 @@ const validaQueryIndefinidas = require('../validacoes/validaQueryIndefinidas');
 const validaQueyDefinidas = require('../validacoes/validaQueyDefinidas');
 const verificaQueryDate = require('../utils/verificaQueryDate');
 const verificaQueryRate = require('../utils/verificaQueryRate');
+const talkerDB = require('../db/talkerDB');
 
 const talkerRoute = express.Router();
 
@@ -23,7 +24,7 @@ talkerRoute.get('/', async (_req, res) => {
     return res.status(200).json(dadosLidos);
   });
 
-  // a rota /search tem que ficar aqui, do contrário, o Thunderclient lê primeiro o /:id 
+  // a rota search tem que ficar aqui, do contrário, o Thunderclient lê primeiro o /:id 
   talkerRoute.get('/search', 
   validaToken, validaQueryIndefinidas, validaQueyDefinidas,
   async (req, res) => {
@@ -45,6 +46,25 @@ talkerRoute.get('/', async (_req, res) => {
     .filter(({ name }) => name.toLowerCase().includes(q.toLowerCase()));
     
     return res.status(200).json(retorno3Query);
+  });
+
+  // também precisa vir antes do /:id
+
+  talkerRoute.get('/db', async (req, res) => {
+    const dadosLidosDB = await talkerDB();
+
+    const palestrantes = dadosLidosDB.map(
+      ({ name, age, id, talk_watched_at: watchedAt, talk_rate: rate }) => (
+      { name,
+        age,
+        id,
+        talk: {
+        watchedAt,
+        rate,
+      } }
+      ),
+    );
+    return res.status(200).json(palestrantes);
   });
 
   talkerRoute.get('/:id', async (req, res) => {
