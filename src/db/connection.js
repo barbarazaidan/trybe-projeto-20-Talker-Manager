@@ -10,6 +10,8 @@ const mysql = require('mysql2/promise');
 //   database: 'TalkerDB',
 // });
 
+// precisa usar essas variáveis de ambiente para rodar no avaliador do git, do contrário a conexão com o banco dá erro. Mais sobre o assunto: https://app.betrybe.com/learn/course/5e938f69-6e32-43b3-9685-c936530fd326/live-lectures/1ad46538-81ac-40b9-8a16-1fa50743c6cf/recording/c5db6c4b-86c6-49d5-8876-15f48a6cdd3a
+
 const connection = mysql.createPool({
   host: process.env.MYSQL_HOSTNAME,
   port: process.env.MYSQL_PORT,
